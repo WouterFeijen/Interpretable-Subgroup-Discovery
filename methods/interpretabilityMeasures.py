@@ -35,8 +35,9 @@ def Feature_Correlation_Scores(original_df, reduced_df):
 
 def DBI(subgroups, df): 
     """
-    
-    
+    Takes the subgroups found by the subgroup detection algorithms, and the original dataframe, and computes the DBI.
+    Centroids are the mean of the subgroup, and euclidean distance is used to compute distance between values and centroids, 
+    and distance between centroids.
     """
     features = [feature for feature in df.columns if feature != 'target']
     centroids = []
@@ -53,7 +54,10 @@ def DBI(subgroups, df):
         k=0
         for j in range(len(centroids)):
             if i!=j:
-                value = subgroup_cohesion[i] + subgroup_cohesion[j]/np.linalg.norm(centroids[i]-centroids[j]) #Fix that value is inf with centroid distance=0
+                try:
+                    value = subgroup_cohesion[i] + subgroup_cohesion[j]/np.linalg.norm(centroids[i]-centroids[j]) #Fix that value is inf with centroid distance=0
+                except ZeroDivisionError:
+                    value = subgroup_cohesion[i] + subgroup_cohesion[j]/np.finfo(float).eps
                 if value > k:
                     k = value
         maxima.append(k)
