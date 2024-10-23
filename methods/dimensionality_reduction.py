@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.decomposition import PCA
+from sklearn.decomposition import SparsePCA
 from sklearn.metrics import mean_squared_error
 
 from tensorflow.keras.callbacks import EarlyStopping
@@ -51,7 +52,7 @@ def reduce_dimensionality(data, reduction_method,
     # remove original columns if deleteOld == True
     if deleteOld:
         data.drop(columns=catColumns + numColumns, inplace=True)
-        
+    
     # reset index to allow concatenation
     data.reset_index(drop=True, inplace=True)
     data = pd.concat([data, reduced_data], axis=1)
@@ -125,9 +126,22 @@ def reduce_with(reduction_method,df,nFeatures,nEpochs,verbose):
         df_reduced = pd.DataFrame(principalComponents, columns=[f'PC{i+1}' for i in range(nFeatures)])
 
     elif reduction_method == 'SPCA':
-        raise NotImplementedError("Reduction method 'SPCA' has not been implemented.")
+        scaler = StandardScaler()
+        scaledData = scaler.fit_transform(df)
+        
+        # apply PCA
+        sparse_pca = SparsePCA(n_components=nFeatures)
+        principalComponents = sparse_pca.fit_transform(scaledData)
+        
+        # reconstruct the data from principal components & calculate reconstruction error
+        reconstructedData = sparse_pca.inverse_transform(principalComponents)
+        mse = mean_squared_error(scaledData, reconstructedData)
+        
+        # create DataFrame for the principal components
+        df_reduced = pd.DataFrame(principalComponents, columns=[f'PC{i+1}' for i in range(nFeatures)])
+
     else:
         raise KeyError(f"Method {reduction_method} is not a valid reduction method.")
     
-
+    
     return df_reduced,mse
