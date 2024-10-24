@@ -116,10 +116,10 @@ def eta(seed, df, features, n_chunks = 5):
             column_data = df_sub[f]
             uniq = column_data.dropna().unique()
             for i in uniq:
-                candidate = "{} == '{}'".format(f, i)
+                candidate = "{} == {}".format(f, i)
                 if not candidate in seed: # if not already there
                     yield refine(seed, candidate)
-                candidate = "{} != '{}'".format(f, i)
+                candidate = "{} != {}".format(f, i)
                 if not candidate in seed: # if not already there
                     yield refine(seed, candidate)
         elif (df_sub[f].dtype == 'int64'):
@@ -137,10 +137,10 @@ def eta(seed, df, features, n_chunks = 5):
         elif (df_sub[f].dtype == 'bool'):
             uniq = column_data.dropna().unique()
             for i in uniq:
-                candidate = "{} == '{}'".format(f, i)
+                candidate = "{} == {}".format(f, i)
                 if not candidate in seed: # if not already there
                     yield refine(seed, candidate)
-                candidate = "{} != '{}'".format(f, i)
+                candidate = "{} != {}".format(f, i)
                 if not candidate in seed: # if not already there
                     yield refine(seed, candidate)
         else:

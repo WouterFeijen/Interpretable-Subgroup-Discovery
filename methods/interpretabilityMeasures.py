@@ -1,5 +1,6 @@
 from scipy.stats import spearmanr
 import numpy as np
+import pandas as pd
 
 def Feature_Correlation_Scores(original_df, reduced_df):
     """
@@ -27,13 +28,11 @@ def Feature_Correlation_Scores(original_df, reduced_df):
     fcs = sum(max_correlations)/len(reduced_components)
     fcss = 1- sum(nonzero_count)/(len(reduced_components)*len(original_features))
 
-    print(fcs, fcss)
-
     return fcs, fcss
 
 
 
-def DBI(subgroups, df): 
+def DBI_beam(subgroups, df): 
     """
     Takes the subgroups found by the subgroup detection algorithms, and the original dataframe, and computes the DBI.
     Centroids are the mean of the subgroup, and euclidean distance is used to compute distance between values and centroids, 
@@ -43,7 +42,7 @@ def DBI(subgroups, df):
     centroids = []
     subgroup_cohesion = []
     for subgroup_index in range(len(subgroups)):
-        subgroup_df = df[df.eval(as_string(subgroups[subgroup_index][1]))][features]
+        subgroup_df = df[df.eval(str(subgroups[subgroup_index][1]).replace("', '", ' and ').replace("['", '').replace("']", ''))][features].astype(float)
         centroid = subgroup_df.mean()
         centroids.append(centroid)
         avg_distance_to_centroid = np.linalg.norm(subgroup_df-centroid, axis=1).mean() 
@@ -54,9 +53,64 @@ def DBI(subgroups, df):
         k=0
         for j in range(len(centroids)):
             if i!=j:
-                try:
-                    value = subgroup_cohesion[i] + subgroup_cohesion[j]/np.linalg.norm(centroids[i]-centroids[j]) #Fix that value is inf with centroid distance=0
-                except ZeroDivisionError:
+                centroid_dist = np.linalg.norm(centroids[i]-centroids[j])
+                if centroid_dist > 0:
+                    value = subgroup_cohesion[i] + subgroup_cohesion[j]/centroid_dist
+                elif centroid_dist == 0:
+                    value = subgroup_cohesion[i] + subgroup_cohesion[j]/np.finfo(float).eps
+                if value > k:
+                    k = value
+        maxima.append(k)
+    dbi = np.mean(maxima)
+
+
+    return dbi
+
+def DBI_ps(subgroups, df): 
+    """
+    Takes the subgroups found by the subgroup detection algorithms, and the original dataframe, and computes the DBI.
+    Centroids are the mean of the subgroup, and euclidean distance is used to compute distance between values and centroids, 
+    and distance between centroids.
+    """
+
+    features = [feature for feature in df.columns if feature != 'target']
+    centroids = []
+    subgroup_cohesion = []
+    for subgroup_index in range(len(subgroups)):
+        oper = str(subgroups["subgroup"][subgroup_index])
+        oper = oper.replace("AND", "&")
+        if oper.find(":") >= 0 :
+            newOpers = []
+            splitOper = oper.split(" & ")
+            for j in range(len(splitOper)-1, -1, -1) :
+                dpIndex = splitOper[j].find(":")
+                if dpIndex >= 0 :
+                    attr = splitOper[j][:dpIndex]
+                    brIndex = splitOper[j].find("[")
+                    dpIndex2 = splitOper[j].find(":", dpIndex+1)
+                    lb = splitOper[j][brIndex+1:dpIndex2]
+                    ub = splitOper[j][dpIndex2+1:-1]
+                    newOpers.append(attr+">="+lb)
+                    newOpers.append(attr+"<="+ub)
+                    del splitOper[j]
+            splitOper += newOpers
+            oper = " & ".join(splitOper)
+        subgroup_df = df[df.eval(oper)][features].astype(float)
+        # subgroup_df = df[df.eval(str(subgroups.loc[subgroup_index, "subgroup"]).replace('AND', 'and'))].astype(float)
+        centroid = subgroup_df.mean()
+        centroids.append(centroid)
+        avg_distance_to_centroid = np.linalg.norm(subgroup_df-centroid, axis=1).mean() 
+        subgroup_cohesion.append(avg_distance_to_centroid)
+
+    maxima = []
+    for i in range(len(centroids)):
+        k=0
+        for j in range(len(centroids)):
+            if i!=j:
+                centroid_dist = np.linalg.norm(centroids[i]-centroids[j])
+                if centroid_dist > 0:
+                    value = subgroup_cohesion[i] + subgroup_cohesion[j]/centroid_dist
+                elif centroid_dist == 0:
                     value = subgroup_cohesion[i] + subgroup_cohesion[j]/np.finfo(float).eps
                 if value > k:
                     k = value
