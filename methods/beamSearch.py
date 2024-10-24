@@ -161,7 +161,7 @@ def eval_quality(desc, df, target):
     wracc = ((len(sub_group)/len(df))**1) * (prop_p_sg - prop_p_df) #for WRAcc a=1
     return wracc
 
-def EMM(w, d, q, catch_all_description, df, features, target, n_chunks=5, ensure_diversity = False):
+def EMM(w, d, q, catch_all_description, df, target, n_chunks=5, ensure_diversity = False,prnt=True):
     """
     w - width of beam, i.e. the max number of results in the beam
     d - num levels, i.e. how many attributes are considered
@@ -174,6 +174,8 @@ def EMM(w, d, q, catch_all_description, df, features, target, n_chunks=5, ensure
     features - features in scope
     target - column name of target attribute in df
     """
+    features = [col for col in df.columns if col!='target']
+
     
     # Initialize variables
     resultSet = BoundedPriorityQueue(q) # Set of results, can contain results from multiple levels
