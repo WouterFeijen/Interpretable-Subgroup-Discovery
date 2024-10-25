@@ -116,10 +116,10 @@ def eta(seed, df, features, n_chunks = 5):
             column_data = df_sub[f]
             uniq = column_data.dropna().unique()
             for i in uniq:
-                candidate = "{} == {}".format(f, i)
+                candidate = "{} == '{}'".format(f, i)
                 if not candidate in seed: # if not already there
                     yield refine(seed, candidate)
-                candidate = "{} != {}".format(f, i)
+                candidate = "{} != '{}'".format(f, i)
                 if not candidate in seed: # if not already there
                     yield refine(seed, candidate)
         elif (df_sub[f].dtype == 'int64'):
@@ -137,15 +137,15 @@ def eta(seed, df, features, n_chunks = 5):
         elif (df_sub[f].dtype == 'bool'):
             uniq = column_data.dropna().unique()
             for i in uniq:
-                candidate = "{} == {}".format(f, i)
+                candidate = "{} == '{}'".format(f, i)
                 if not candidate in seed: # if not already there
                     yield refine(seed, candidate)
-                candidate = "{} != {}".format(f, i)
+                candidate = "{} != '{}'".format(f, i)
                 if not candidate in seed: # if not already there
                     yield refine(seed, candidate)
         else:
             assert False
-            
+
 def satisfies_all(desc, df, threshold=0.02):
     # Function used to check if subgroup with pattern <desc> is sufficiently big relative to its dataset <df>
     # A subgroup is sufficiently big if the proportion of data included in it exceeds <threshold>   
@@ -175,7 +175,6 @@ def EMM(w, d, q, catch_all_description, df, target, n_chunks=5, ensure_diversity
     target - column name of target attribute in df
     """
     features = [col for col in df.columns if col!='target']
-
     
     # Initialize variables
     resultSet = BoundedPriorityQueue(q) # Set of results, can contain results from multiple levels
@@ -185,14 +184,16 @@ def EMM(w, d, q, catch_all_description, df, target, n_chunks=5, ensure_diversity
 
     # Perform BeamSearch for <d> levels
     for level in range(d):
-        print("level : ", level)
+        if prnt:
+            print("level : ", level)
         
         # Initialize this level's beam
         beam = BoundedPriorityQueue(w)
 
         # Go over all rules generated on previous level, or 'empty' rule if level = 0 
         for seed in candidateQueue.get_values():
-            print("    seed : ", seed)
+            if prnt:
+                print("    seed : ", seed)
             
             # Start by evaluating the quality of the seed
             if seed != []:
