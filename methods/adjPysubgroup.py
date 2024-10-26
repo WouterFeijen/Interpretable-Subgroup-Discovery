@@ -56,20 +56,51 @@ class adjusted_BestFirstSearch(BestFirstSearch):
         result.sort(key=lambda x: x[0], reverse=True)
         return ps.SubgroupDiscoveryResult(result, task)
     
+# ! incorrect version
 # Overwrite of the pysubgroup DFS class to use the overwritten pysubgroup add_if_required function 
-class adjusted_DFS(SimpleDFS):
-    def search_internal(self, task, prefix, modification_set, result, use_optimistic_estimates):
-        sg = ps.Conjunction(copy.copy(prefix))
-        statistics = task.qf.calculate_statistics(sg, task.target, task.data)
-        if use_optimistic_estimates and len(prefix) < task.depth and isinstance(task.qf, ps.BoundedInterestingnessMeasure):
-            optimistic_estimate = task.qf.optimistic_estimate(sg, task.target, task.data, statistics)
-            if not optimistic_estimate > ps.minimum_required_quality(result, task):
-                return result
-        quality = task.qf.evaluate(sg, task.target, task.data, statistics)
-        add_if_required(result, sg, quality, task, check_for_duplicates=True, statistics=statistics)
-        if not ps.constraints_satisfied(task.constraints_monotone, sg, statistics=statistics, data=task.data):
-            return
+# class adjusted_DFS(SimpleDFS):
+    
+#     def search_internal(self, task, prefix, modification_set, result, use_optimistic_estimates):
+#         print(prefix)
+#         sg = ps.Conjunction(copy.copy(prefix))
+#         statistics = task.qf.calculate_statistics(sg, task.target, task.data)
+#         if use_optimistic_estimates and len(prefix) < task.depth and isinstance(task.qf, ps.BoundedInterestingnessMeasure):
+#             optimistic_estimate = task.qf.optimistic_estimate(sg, task.target, task.data, statistics)
+#             if not optimistic_estimate > ps.minimum_required_quality(result, task):
+#                 return result
+#         quality = task.qf.evaluate(sg, task.target, task.data, statistics)
+#         add_if_required(result, sg, quality, task, check_for_duplicates=True, statistics=statistics)
+#         if not ps.constraints_satisfied(task.constraints_monotone, sg, statistics=statistics, data=task.data):
+#             return
         
+#         if len(prefix) < task.depth:
+#             new_modification_set = copy.copy(modification_set)
+#             for sel in modification_set:
+#                 prefix.append(sel)
+#                 new_modification_set.pop(0)
+#                 self.search_internal(task, prefix, new_modification_set, result, use_optimistic_estimates)
+#                 # remove the sel again
+#                 prefix.pop(-1)
+#         return result
+
+
+# ! corrected version
+class adjusted_DFS(SimpleDFS):
+    
+    def search_internal(self, task, prefix, modification_set, result, use_optimistic_estimates):
+        # Skip evaluating the default subgroup
+        if len(prefix) != 0:
+            sg = ps.Conjunction(copy.copy(prefix))
+            statistics = task.qf.calculate_statistics(sg, task.target, task.data)
+            if use_optimistic_estimates and len(prefix) < task.depth and isinstance(task.qf, ps.BoundedInterestingnessMeasure):
+                optimistic_estimate = task.qf.optimistic_estimate(sg, task.target, task.data, statistics)
+                if not optimistic_estimate > ps.minimum_required_quality(result, task):
+                    return result
+            quality = task.qf.evaluate(sg, task.target, task.data, statistics)
+            add_if_required(result, sg, quality, task, check_for_duplicates=True, statistics=statistics)
+            if not ps.constraints_satisfied(task.constraints_monotone, sg, statistics=statistics, data=task.data):
+                return
+        # Proceed to generate refinements even if prefix is empty
         if len(prefix) < task.depth:
             new_modification_set = copy.copy(modification_set)
             for sel in modification_set:
