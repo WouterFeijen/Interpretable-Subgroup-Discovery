@@ -1,4 +1,5 @@
 from scipy.stats import spearmanr
+from sklearn.preprocessing import StandardScaler
 import numpy as np
 import pandas as pd
 
@@ -34,18 +35,22 @@ def Feature_Correlation_Scores(original_df, reduced_df):
 
 def DBI_beam(subgroups, df): 
     """
-    Takes the subgroups found by the subgroup detection algorithms, and the original dataframe, and computes the DBI.
+    Takes the subgroups found by the subgroup detection algorithms, and the encoded dataframe, and computes the DBI.
     Centroids are the mean of the subgroup, and euclidean distance is used to compute distance between values and centroids, 
     and distance between centroids.
     """
     features = [feature for feature in df.columns if feature != 'target']
     centroids = []
     subgroup_cohesion = []
+    scaler = StandardScaler()
+    scaler.fit(df[features])
+
     for subgroup_index in range(len(subgroups)):
         subgroup_df = df[df.eval(str(subgroups[subgroup_index][1]).replace("', '", ' and ').replace("['", '').replace("']", ''))][features].astype(float)
-        centroid = subgroup_df.mean()
+        transformed_subgroup = pd.DataFrame(scaler.transform(subgroup_df), index=subgroup_df.index, columns=features)
+        centroid = transformed_subgroup.mean()
         centroids.append(centroid)
-        avg_distance_to_centroid = np.linalg.norm(subgroup_df-centroid, axis=1).mean() 
+        avg_distance_to_centroid = np.linalg.norm(transformed_subgroup-centroid, axis=1).mean() 
         subgroup_cohesion.append(avg_distance_to_centroid)
     
     # for subgroup_index in range(len(subgroups)): #TO CHECK SUBGROUPS FOR EXTREMELY LARGE DB INDEX
@@ -73,7 +78,7 @@ def DBI_beam(subgroups, df):
 
 def DBI_ps(subgroups, df): 
     """
-    Takes the subgroups found by the subgroup detection algorithms, and the original dataframe, and computes the DBI.
+    Takes the subgroups found by the subgroup detection algorithms, and the encoded dataframe, and computes the DBI.
     Centroids are the mean of the subgroup, and euclidean distance is used to compute distance between values and centroids, 
     and distance between centroids.
     """
@@ -81,6 +86,9 @@ def DBI_ps(subgroups, df):
     features = [feature for feature in df.columns if feature != 'target']
     centroids = []
     subgroup_cohesion = []
+    scaler = StandardScaler()
+    scaler.fit(df[features])
+
     for subgroup_index in range(len(subgroups)):
         oper = str(subgroups["subgroup"][subgroup_index])
         oper = oper.replace("AND", "&")
@@ -101,10 +109,11 @@ def DBI_ps(subgroups, df):
             splitOper += newOpers
             oper = " & ".join(splitOper)
         subgroup_df = df[df.eval(oper)][features].astype(float)
+        transformed_subgroup = pd.DataFrame(scaler.transform(subgroup_df), index=subgroup_df.index, columns=features)
         # subgroup_df = df[df.eval(str(subgroups.loc[subgroup_index, "subgroup"]).replace('AND', 'and'))].astype(float)
-        centroid = subgroup_df.mean()
+        centroid = transformed_subgroup.mean()
         centroids.append(centroid)
-        avg_distance_to_centroid = np.linalg.norm(subgroup_df-centroid, axis=1).mean() 
+        avg_distance_to_centroid = np.linalg.norm(transformed_subgroup-centroid, axis=1).mean() 
         subgroup_cohesion.append(avg_distance_to_centroid)
 
     maxima = []
