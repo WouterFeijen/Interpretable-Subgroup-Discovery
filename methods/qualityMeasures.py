@@ -30,6 +30,24 @@ def calc_result_bs(df_1, df_2, subgroups_1, subgroups_2):
     delete = len(df_1[(df_1['subgroups_1'] == 0) & (df_2['subgroups_2'] > 0)])
     
     # Print statements
+    coverage_en = len(df_1[df_1['subgroups_1']>0])
+    coverage_prop_en = len(df_1[df_1['subgroups_1']>0])/len(df_1)
+    added = add
+    added_prop = add/len(df_1)
+    removed = delete
+    removed_prop = delete/len(df_1)
+    avg_size_en = df_1['subgroups_1'].sum()/len(subgroups_1)
+    max_wracc_en = subgroups_1[0][0]
+    avg_wracc_en = np.mean(wracc_g1)
+    coverage = len(df_2[df_2['subgroups_2']>0])
+    coverage_prop = len(df_2[df_2['subgroups_2']>0])/len(df_2)
+    avg_size = df_2['subgroups_2'].sum()/len(subgroups_2)
+    max_wracc = subgroups_2[0][0]
+    avg_wracc = np.mean(wracc_g2)
+
+    output_en = [coverage_en, coverage_prop_en, added, added_prop, removed, removed_prop, avg_size_en, max_wracc_en, avg_wracc_en]
+    output = [coverage, coverage_prop, avg_size, max_wracc, avg_wracc]
+
     print('coverage autoencoding: {}, ({})'.format(len(df_1[df_1['subgroups_1']>0]), len(df_1[df_1['subgroups_1']>0])/len(df_1)))
     print('coverage no auto encoding: {}, ({})'.format(len(df_2[df_2['subgroups_2']>0]), len(df_2[df_2['subgroups_2']>0])/len(df_2)))
     print('# rows added in subgroups: {} ({})'.format(add, add/len(df_1)))
@@ -45,6 +63,8 @@ def calc_result_bs(df_1, df_2, subgroups_1, subgroups_2):
     df_2['subgroups_2'].hist();
     plt.title("No auto-encoding")
     plt.show()
+
+    return output_en, output
     
 # Function used to evaluate and summarize the PySubgroup algorithm outcomes
 def calc_result_ps(df_1, df_2, results_df_1, results_df_2):
@@ -106,6 +126,24 @@ def calc_result_ps(df_1, df_2, results_df_1, results_df_2):
     delete = len(df_1[(df_1['subgroups_1'] == 0) & (df_2['subgroups_2'] > 0)])
 
     # Print statements
+    coverage_en = len(df_1[df_1['subgroups_1']>0])
+    coverage_prop_en = len(df_1[df_1['subgroups_1']>0])/len(df_1)
+    added = add
+    added_prop = add/len(df_1)
+    removed = delete
+    removed_prop = delete/len(df_1)
+    avg_size_en = df_1['subgroups_1'].sum()/len(results_df_1)
+    max_wracc_en = s1_wracc_max
+    avg_wracc_en = s1_wracc_mean
+    coverage = len(df_2[df_2['subgroups_2']>0])
+    coverage_prop = len(df_2[df_2['subgroups_2']>0])/len(df_2)
+    avg_size = df_2['subgroups_2'].sum()/len(results_df_2)
+    max_wracc = s2_wracc_max
+    avg_wracc = s2_wracc_mean
+
+    output_en = [coverage_en, coverage_prop_en, added, added_prop, removed, removed_prop, avg_size_en, max_wracc_en, avg_wracc_en]
+    output = [coverage, coverage_prop, avg_size, max_wracc, avg_wracc]
+
     print('coverage auto-encoding: {}, ({})'.format(len(df_1[df_1['subgroups_1']>0]), len(df_1[df_1['subgroups_1']>0])/len(df_1)))
     print('coverage no auto-encoding: {}, ({})'.format(len(df_2[df_2['subgroups_2']>0]), len(df_2[df_2['subgroups_2']>0])/len(df_2)))
     print('# rows added in subgroups: {} ({})'.format(add, add/len(df_1)))
@@ -123,3 +161,5 @@ def calc_result_ps(df_1, df_2, results_df_1, results_df_2):
     df_2['subgroups_2'].hist();
     plt.title("No auto-encoding")
     plt.show()
+
+    return output_en, output
