@@ -20,7 +20,7 @@ def Feature_Correlation_Scores(original_df, reduced_df):
             if len(original_df[feature].unique())>1:
                 corr, p = spearmanr(reduced_df[component], original_df[feature])
                 correlations[feature] = corr
-            elif len(original_df[feature].unique()<=1):
+            elif len(original_df[feature].unique())<=1:
                 correlations[feature] = 0
         max_correlations.append(max(correlations.values()))
         nonzero_count.append(sum([round(correlation,1) != 0 for correlation in correlations.values()]))
@@ -47,6 +47,11 @@ def DBI_beam(subgroups, df):
         centroids.append(centroid)
         avg_distance_to_centroid = np.linalg.norm(subgroup_df-centroid, axis=1).mean() 
         subgroup_cohesion.append(avg_distance_to_centroid)
+    
+    # for subgroup_index in range(len(subgroups)): #TO CHECK SUBGROUPS FOR EXTREMELY LARGE DB INDEX
+    #     condition = str(subgroups[subgroup_index][1]).replace("', '", ' and ').replace("['", '').replace("']", '')
+    #     print(f"Subgroup {subgroup_index} condition: {condition}")
+    #     print(f"Subgroup {subgroup_index} size: {len(df[df.eval(condition)])}")
     
     maxima = []
     for i in range(len(centroids)):
