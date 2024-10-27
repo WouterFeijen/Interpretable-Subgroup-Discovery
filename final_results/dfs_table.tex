@@ -1,0 +1,48 @@
+
+\begin{table}
+\centering
+\scriptsize
+\caption{Results of Depth-First Search Subgroup Discovery Method with Dimensionality Reduction}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{p{1.35cm}@{\extracolsep{\fill}}lcccccc@{}}
+\toprule
+Dataset & Metrics & Ionosphere & Arrhythmia & Indoor & Soybean & Mushroom & Adult \\
+\midrule
+\multirow{5}{*}{Vanilla} & Coverage & 333 & 296 & 8417 & 251 & 8124 & 41678 \\
+& Coverage (Prop.) & 0.949 & 0.705 & 0.4 & 0.944 & 1.0 & 0.853 \\
+& Avg Size & 58.82 & 97.57 & 4176.44 & 134.99 & 2105.28 & 9164.5 \\
+& Max WRAcc & 0.069 & 0.066 & 0.107 & 0.241 & 0.182 & 0.063 \\
+& Avg WRAcc & 0.043 & 0.058 & 0.106 & 0.162 & 0.09 & 0.025 \\
+\midrule
+\multirow{9}{*}{AutoEncoding} & Coverage & 338 & 395 & 19418 & 253 & 7751 & 48842 \\
+& Coverage (Prop.) & 0.963 & 0.94 & 0.923 & 0.951 & 0.954 & 1.0 \\
+& Added & 14 & 108 & 11001 & 10 & 0 & 7164 \\
+& Added (Prop.) & 0.04 & 0.257 & 0.523 & 0.038 & 0.0 & 0.147 \\
+& Removed & 9 & 9 & 0 & 8 & 373 & 0 \\
+& Removed (Prop.) & 0.026 & 0.021 & 0.0 & 0.03 & 0.046 & 0.0 \\
+& Avg Size & 26.13 & 22.6 & 1164.57 & 17.56 & 486.9 & 4308.985 \\
+& Max WRAcc & 0.046 & 0.06 & 0.081 & 0.104 & 0.077 & 0.027 \\
+& Avg WRAcc & 0.014 & 0.009 & 0.014 & 0.019 & 0.015 & 0.0 \\
+\midrule
+\multirow{9}{*}{PCA}& Coverage & 339 & 404 & 15845 & 264 & 7153 & 45107 \\
+& Coverage (Prop.) & 0.966 & 0.962 & 0.753 & 0.992 & 0.88 & 0.924 \\
+& Added & 13 & 110 & 7428 & 13 & 0 & 6296 \\
+& Added (Prop.) & 0.037 & 0.262 & 0.353 & 0.049 & 0.0 & 0.129 \\
+& Removed & 7 & 2 & 0 & 0 & 971 & 2867 \\
+& Removed (Prop.) & 0.02 & 0.005 & 0.0 & 0.0 & 0.12 & 0.059 \\
+& Avg Size & 24.13 & 21.45 & 1115.16 & 16.92 & 759.22 & 3183.91 \\
+& Max WRAcc & 0.06 & 0.06 & 0.107 & 0.064 & 0.104 & 0.048 \\
+& Avg WRAcc & 0.015 & 0.006 & 0.02 & 0.012 & 0.04 & 0.007 \\
+\midrule
+\multirow{9}{*}{SPCA}& Coverage & 344 & 415 & 18146 & 266 & 7150 & 44482 \\
+& Coverage (Prop.) & 0.98 & 0.988 & 0.862 & 1.0 & 0.88 & 0.911 \\
+& Added & 17 & 120 & 9739 & 15 & 0 & 5318 \\
+& Added (Prop.) & 0.048 & 0.286 & 0.463 & 0.056 & 0.0 & 0.109 \\
+& Removed & 6 & 1 & 10 & 0 & 974 & 2514 \\
+& Removed (Prop.) & 0.017 & 0.002 & 0.0 & 0.0 & 0.12 & 0.051 \\
+& Avg Size & 24.75 & 24.0 & 1104.0 & 15.88 & 622.89 & 2975.67 \\
+& Max WRAcc & 0.058 & 0.068 & 0.107 & 0.098 & 0.104 & 0.037 \\
+& Avg WRAcc & 0.013 & 0.005 & 0.017 & 0.01 & 0.032 & 0.007 \\
+\bottomrule
+\end{tabular}%}
+\end{table}
