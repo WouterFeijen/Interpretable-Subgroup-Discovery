@@ -89,11 +89,11 @@ def as_string(desc):
     # Adds ' and ' to <desc> such that selectors are properly separated when the refine function is used
     return ' and '.join(desc)
 
-def eta(seed, df, features, n_chunks = 5):
+def eta(seed, df, features, n_chunks = 5,prnt=False):
     # Returns a generator which includes all possible refinements of <seed> for the given <features> on dataset <df>
     # n_chunks refers to the number of possible splits we consider for numerical features
-    
-    print("eta ", seed)
+    if prnt:
+        print("eta ", seed)
 
     # Find features present in the current seed and exclude them from the possible features:
     used_features = set()
@@ -157,13 +157,13 @@ def eval_quality(desc, df, target):
 
 
 
-def EMM(w, d, q, catch_all_description, df, target, n_chunks=5, ensure_diversity = False,prnt=True):
+def EMM(w, d, q, catch_all_description, df, target, n_chunks=5, ensure_diversity = False,prnt_level=True,prnt_seed=True,prnt_eta=False):
     """
     w - width of beam, i.e. the max number of results in the beam
     d - num levels, i.e. how many attributes are considered
     q - max results, i.e. max number of results output by the algorithm
     eta - a function that receives a description and returns all possible refinements
-    satisfies_all - a function that receives a description and verifies wheather it satisfies some requirements as needed
+    satisfies_all - a function that receives a description and verifies whether it satisfies some requirements as needed
     eval_quality - returns a quality for a given description. This should be comparable to qualities of other descriptions
     catch_all_description - the equivalent of True, or all, as that the whole dataset shall match
     df - dataframe of mined dataset
@@ -178,12 +178,12 @@ def EMM(w, d, q, catch_all_description, df, target, n_chunks=5, ensure_diversity
     candidateQueue.enqueue(catch_all_description) # Set of results on a particular level
     error = 0.00001 # Allowed error margin (due to floating point error) when comparing the quality of solutions
 
-    # ! keep track of seen_subgroups:
+    # keep track of seen_subgroups:
     seen_subgroups = set()
 
     # Perform BeamSearch for <d> levels
     for level in range(d):
-        if prnt:
+        if prnt_level:
             print("level : ", level)
         
         # Initialize this level's beam
@@ -191,19 +191,20 @@ def EMM(w, d, q, catch_all_description, df, target, n_chunks=5, ensure_diversity
 
         # Go over all rules generated on previous level, or 'empty' rule if level = 0 
         for seed in candidateQueue.get_values():
-            if prnt:
+            if prnt_seed:
                 print("    seed : ", seed)
             
             # Start by evaluating the quality of the seed
             if seed != []:
                 seed_quality = eval_quality(seed, df, target)
-                beam.add(seed, seed_quality) # ! include seed itself in the beam
+                # include the seed itself in the beam
+                beam.add(seed, seed_quality)
             else:
                 seed_quality = 99
 
             # For all refinements created by eta function on descriptions (i.e features), which can be different types of columns
             # eta(seed) reads the dataset given certain seed (i.e. already created rules) and looks at new descriptions
-            for desc in eta(seed, df, features, n_chunks):
+            for desc in eta(seed, df, features, n_chunks,prnt=prnt_eta):
 
                 # Check if the subgroup contains at least x% of data, proceed if yes
                 if satisfies_all(desc, df):
