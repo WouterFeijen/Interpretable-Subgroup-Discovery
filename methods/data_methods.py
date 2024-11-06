@@ -1,10 +1,11 @@
 # Package imports
 import pandas as pd
+import os
 # make sure replace works as intended
 pd.set_option('future.no_silent_downcasting', True)
 
 # Function used to import a specified dataset
-def getData(dataset) :
+def getData(dataset,path='data/') :
     
     # Initializations
     dictio = {}
@@ -17,7 +18,7 @@ def getData(dataset) :
 
         dictio[34] = 'target'
 
-        df = pd.read_csv('data/ionosphere.data', sep=",", header = None).rename(columns=dictio)
+        df = pd.read_csv(os.path.join(path,'ionosphere.data'), sep=",", header = None).rename(columns=dictio)
         df = df.replace({'g': 1, 'b':0})
         cat = []
         num =  [i for i in df.columns if i != 'target']
@@ -27,7 +28,7 @@ def getData(dataset) :
         for i in range(1,23):
             dictio[i]= 'attribute' + str(i)
         dictio[0] = 'target'
-        df =  pd.read_csv('data/Mushroom.data', sep=",", header = None).rename(columns=dictio)
+        df =  pd.read_csv(os.path.join(path,'Mushroom.data'), sep=",", header = None).rename(columns=dictio)
         df['target'] = [1 if x == 'p' else 0 for x in df['target']]
         cat = [i for i in df.columns if i != 'target']
         num =  []
@@ -37,8 +38,8 @@ def getData(dataset) :
         for i in range(14):
             dictio[i]= 'attribute' + str(i)
         dictio[14] = 'target'
-        df =  pd.read_csv('data/adult.data', sep=",", header = None).rename(columns=dictio)
-        df2 =  pd.read_csv('data/adult.test', sep=",", header = None, skiprows=1).rename(columns=dictio)
+        df =  pd.read_csv(os.path.join(path,'adult.data'), sep=",", header = None).rename(columns=dictio)
+        df2 =  pd.read_csv(os.path.join(path,'adult.test'), sep=",", header = None, skiprows=1).rename(columns=dictio)
         df = pd.concat([df, df2])
         df = df.reset_index().drop(columns=['index'])
         df = df.replace({' <=50K': 0, ' >50K':1})
@@ -47,7 +48,7 @@ def getData(dataset) :
     
     #Soybean dataset
     elif dataset == "Soybean" :
-        df =  pd.read_csv('data/soybean-large.data', sep=",", header = None, na_values = ['?'])
+        df =  pd.read_csv(os.path.join(path,'soybean-large.data'), sep=",", header = None, na_values = ['?'])
         df = df.replace({1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 0: '0'})
         df = df.replace({'brown-spot': 1, 'frog-eye-leaf-spot': 1, 'alternarialeaf-spot': 1, 'phyllosticta-leaf-spot': 1})
         df['target'] = [i if i == 1 else 0 for i in df[0]]
@@ -76,7 +77,7 @@ def getData(dataset) :
         for i in range(279):
               dictio[i]= 'attribute' + str(i)
         dictio[279] = 'target'
-        df =  pd.read_csv('data/arrhythmia.data', sep=",", header = None, na_values = ['?']).rename(columns=dictio)
+        df =  pd.read_csv(os.path.join(path,'arrhythmia.data'), sep=",", header = None, na_values = ['?']).rename(columns=dictio)
         df['target'] = [0 if x == 1 else 1 for x in df['target']]
         df = df.drop(columns=['attribute{}'.format(x) for x in [13, 19, 67, 139, 151, 164, 204, 264, 274]])
         df = df.astype(lijst)
@@ -87,8 +88,8 @@ def getData(dataset) :
         
     # Indoor dataset
     elif dataset == "Indoor" :
-        df = pd.read_csv('data/Indoor1.csv', sep=",", na_values = ['na'])
-        df2 = pd.read_csv('data/Indoor2.csv', sep=",", na_values = ['na'])
+        df = pd.read_csv(os.path.join(path,'Indoor1.csv'), sep=",", na_values = ['na'])
+        df2 = pd.read_csv(os.path.join(path,'Indoor2.csv'), sep=",", na_values = ['na'])
         df = pd.concat([df, df2])
         df['target'] = [1 if x == 2 else 0 for x in df['BUILDINGID']]
         df = df.drop(['LONGITUDE','LATITUDE','FLOOR', 'SPACEID', 'RELATIVEPOSITION', 'TIMESTAMP', 'BUILDINGID'], axis=1)
