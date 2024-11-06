@@ -122,7 +122,7 @@ def eta(seed, df, features, n_chunks = 5,prnt=False):
                 yield refine(seed, candidate_leq)
                 yield refine(seed, candidate_gt)
 
-        if pd.api.types.is_categorical_dtype(df_sub[f]) or pd.api.types.is_object_dtype(df_sub[f]):
+        elif pd.api.types.is_categorical_dtype(df_sub[f]) or pd.api.types.is_object_dtype(df_sub[f]):
             column_data = df_sub[f]
             uniq = column_data.dropna().unique()
             for i in uniq:
@@ -149,7 +149,9 @@ def satisfies_all(desc, df, threshold=0.02):
 
 def eval_quality(desc, df, target):
     # Function used to calculate the solution's WRAcc
-    sub_group = df[df.eval(as_string(desc))] 
+    sub_group = df[df.eval(as_string(desc))]
+    if len(sub_group) == 0:
+        return float('-inf')
     prop_p_sg = len(sub_group[sub_group[target]==1])/len(sub_group)
     prop_p_df = len(df[df[target]==1])/len(df)
     wracc = ((len(sub_group)/len(df))**1) * (prop_p_sg - prop_p_df) #for WRAcc a=1
@@ -196,11 +198,23 @@ def EMM(w, d, q, catch_all_description, df, target, n_chunks=5, ensure_diversity
             
             # Start by evaluating the quality of the seed
             if seed != []:
+
                 seed_quality = eval_quality(seed, df, target)
-                # include the seed itself in the beam
-                beam.add(seed, seed_quality)
+                # add seed to seen subgroups
+                # subgroup_indices = df[df.eval(as_string(seed))].index
+                # subgroup_hash = hash(frozenset(subgroup_indices))
+                # if subgroup_hash not in seen_subgroups:
+                #     seen_subgroups.add(subgroup_hash)
+                
+                # # if seed quality enough, add it to resultSet
+                # if ensure_diversity:
+                #     if abs(quality - seed_quality) > error:
+                #         resultSet.add(seed, seed_quality)
+                # else:
+                #     resultSet.add(seed, seed_quality)
+
             else:
-                seed_quality = 99
+                seed_quality = float('-inf')
 
             # For all refinements created by eta function on descriptions (i.e features), which can be different types of columns
             # eta(seed) reads the dataset given certain seed (i.e. already created rules) and looks at new descriptions
@@ -210,7 +224,7 @@ def EMM(w, d, q, catch_all_description, df, target, n_chunks=5, ensure_diversity
                 if satisfies_all(desc, df):
                     # generate hash of subgroup indices
                     subgroup_indices = df[df.eval(as_string(desc))].index
-                    subgroup_hash = tuple(sorted(subgroup_indices))
+                    subgroup_hash = hash(frozenset(subgroup_indices))
 
                     # skip if the (hash of the) subgroup has already been visited
                     if subgroup_hash in seen_subgroups:
@@ -227,7 +241,7 @@ def EMM(w, d, q, catch_all_description, df, target, n_chunks=5, ensure_diversity
                     # Data Mining and Knowledge Discovery, 25(2), 208-242.
                     if ensure_diversity:
                         # if quality < (seed_quality * 1-error) or quality > (seed_quality * 1+error) : # ! <- irrelevantly long condition
-                        if abs(quality - quality) > error:
+                        if abs(quality - seed_quality) > error:
                             resultSet.add(desc, quality)
                             beam.add(desc, quality)
                     else:
