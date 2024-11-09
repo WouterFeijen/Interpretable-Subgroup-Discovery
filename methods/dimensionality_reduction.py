@@ -16,6 +16,9 @@ def reduce_dimensionality(data, reduction_method,
                           nFeatures=5, minSize=1, nEpochs=100,
                           deleteOld=True, verbose=False):
     """
+    Function which takes data and a reduction method as input and reduces the dimensionality of the data using reduction_method in the reduce_with function. 
+
+    Attributes:
     data: Dataset that dimension reduction ought to be performed on
     catColumns: List of categorical column names that are to be encoded
     numColumns: List of numerical column names that are to be reduced
@@ -61,10 +64,18 @@ def reduce_dimensionality(data, reduction_method,
     # Return result
     return data, mse
 
-
 # Function that performs dimensionality reduction based on a reduction method that is takes as input
-def reduce_with(reduction_method,df,nFeatures,nEpochs,verbose):
-    
+def reduce_with(reduction_method : str, df : pd.core.frame.DataFrame, nFeatures : int, nEpochs : int, verbose : bool):
+    """
+    Use reduction_method to reduce the dimensionality of df from len(df.columns) to nFeatures.
+
+    Attributes:
+
+    reduction_method: method used to reduce the dimensionality of df (auto_encoder, PCA, or SPCA)
+    df: data of which the dimensionality should be reduced
+    nFeatures: number of features to which the data should be reduced
+    """
+
     if reduction_method == 'auto_encoder':
         
         # Encoder
